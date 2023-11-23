@@ -3,7 +3,7 @@ import requests
 import json
 import time
 
-topic = "yassinecounter"
+topic = "movietopic"
 kafka_config = {
     "bootstrap.servers": "localhost:9092", 
 }
