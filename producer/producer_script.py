@@ -14,9 +14,9 @@ while True:
     response = requests.get("http://127.0.0.1:5000/get_movies/1")
     time.sleep(2)
     if response.status_code == 200:
-        data = json.dumps(response.json())
+        data = json.dumps(response.json()[0])
         producer.produce(topic, key="randomovie", value=data)
         producer.flush()
-        print(response.json())
+        print(data)
     else:
         print(response.status_code)
