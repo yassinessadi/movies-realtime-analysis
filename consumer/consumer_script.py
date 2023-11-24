@@ -1,19 +1,21 @@
 from neo4j import GraphDatabase
-from pykafka import KafkaClient
+from confluent_kafka import Consumer
 
 
 URI = "bolt://localhost:7687"
 AUTH = ("", "")
 
-kClient = KafkaClient(hosts="127.0.0.1:9092")
+topic = "movietopic"
+kafka_config = {
+    "bootstrap.servers": "localhost:9092", 
+}
 
-topic = kClient.topics['movies_info']
+Consumer = Consumer(kafka_config)
 
-consumer = topic.get_simple_consumer()
+# for message in consumer:
+#     if message is not None:
+#         print(message.offset, message.value)
 
-for message in consumer:
-    if message is not None:
-        print(message.offset, message.value)
 
 
 # print(kClient.topics)

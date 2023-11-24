@@ -34,14 +34,6 @@ services:
       KAFKA_LISTENERS: INSIDE://0.0.0.0:9092,OUTSIDE://0.0.0.0:9093
       KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-<<<<<<< HEAD
       KAFKA_CREATE_TOPICS: "movietopic:1:1"
-=======
-<<<<<<< HEAD
-      KAFKA_CREATE_TOPICS: "movies_info:1:1"
-=======
-      KAFKA_CREATE_TOPICS: "movietopic:1:1"
->>>>>>> 2ef97dd83c662887ad2229fa1869c44a2335d759
->>>>>>> 3f0ad4a933f0c49ff505e1b490dd15c2aece2cf5
     networks:
       - app-tier
