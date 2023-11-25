@@ -3,10 +3,13 @@ from confluent_kafka import Consumer,  KafkaError
 import json
 
 URI = "bolt://localhost:7687"
+
 AUTH = ("", "")
 
-topic = "movietopic"
+topic = "ratingmoviesapplication"
+
 kafka_group_id = 'group-id'
+
 kafka_config = {
     'group.id': kafka_group_id,
     "bootstrap.servers": "localhost:9092", 
@@ -17,9 +20,9 @@ consumer.subscribe([topic])
 
 while True:
     msg = consumer.poll(1.0)
-
     if msg is None:
         continue
+    print(msg.value())
 
     if msg.error():
         if msg.error().code() == KafkaError._PARTITION_EOF:
@@ -49,15 +52,30 @@ while True:
             client.verify_connectivity()
             
             #creation movie node
-            records, summary, keys = client.execute_query("MERGE (m:Movie {movieId: $movieId,title: $title}) RETURN m.movieId AS movieId;",
+            records, summary, keys = client.execute_query(
+                "MERGE (m:Movie {movieId: $movieId,title: $title}) RETURN m.movieId AS movieId;",
             movieId=movie['movieId'],
             title=movie['title'],
             database_="memgraph",
             )
-
+            records, summary, keys = client.execute_query(
+                "MERGE (u:User {userId: $userId}) ",
+            userId=user['userId'],
+            rating=user['rating'],
+            timestamp=user['timestamp'],
+            database_="memgraph",
+            )
+            records, summary, keys = client.execute_query(
+                "MERGE (u:User)-[r:RATED {rating: ToFloat($rating), timestamp: $timestamp}]->(m:Movie) where u.userId == $userId and m.movieId == $movieId;",
+            userId=user['userId'],
+            rating=user['rating'],
+            movieId=movie['movieId'],
+            timestamp=user['timestamp'],
+            database_="memgraph",
+            )
             for record in records:
                 print(record["movieId"])
-        #creation relationship
+            #creation relationship
 
 
 
