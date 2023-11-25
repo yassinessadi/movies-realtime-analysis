@@ -22,7 +22,7 @@ while True:
     msg = consumer.poll(1.0)
     if msg is None:
         continue
-    print(msg.value())
+    # print(msg.value())
 
     if msg.error():
         if msg.error().code() == KafkaError._PARTITION_EOF:
@@ -66,12 +66,15 @@ while True:
             database_="memgraph",
             )
             records, summary, keys = client.execute_query(
-                "MERGE (u:User)-[r:RATED {rating: ToFloat($rating), timestamp: $timestamp}]->(m:Movie) where u.userId == $userId and m.movieId == $movieId;",
-            userId=user['userId'],
-            rating=user['rating'],
-            movieId=movie['movieId'],
-            timestamp=user['timestamp'],
-            database_="memgraph",
+                """
+                MATCH (u:User {userId: $userId}), (m:Movie {movieId: $movieId})
+                MERGE (u)-[r:RATED {rating: ToFloat($rating), timestamp: $timestamp}]->(m)
+                """,
+                userId=user['userId'],
+                rating=user['rating'],
+                movieId=movie['movieId'],
+                timestamp=user['timestamp'],
+                database_="memgraph"
             )
             for record in records:
                 print(record["movieId"])
