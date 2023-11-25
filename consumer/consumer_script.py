@@ -45,19 +45,21 @@ while True:
 
         movie['movieId'] = data['movie']['movieId']
         movie['title'] = data['movie']['title']
+        movie['genres'] = data['movie']['genres']
 
         with GraphDatabase.driver(URI, auth=AUTH) as client:
     
             # Check the connection
             client.verify_connectivity()
             
-            #creation movie node
+            # Creation movie node
             records, summary, keys = client.execute_query(
                 "MERGE (m:Movie {movieId: $movieId,title: $title}) RETURN m.movieId AS movieId;",
             movieId=movie['movieId'],
             title=movie['title'],
             database_="memgraph",
             )
+            # Creation user node
             records, summary, keys = client.execute_query(
                 "MERGE (u:User {userId: $userId}) ",
             userId=user['userId'],
@@ -65,14 +67,25 @@ while True:
             timestamp=user['timestamp'],
             database_="memgraph",
             )
+            # Creation of genre node
+            for genre in movie['genres']:
+                records, summary, keys = client.execute_query(
+                    "MERGE (g:Genre {genre: $genre}) ",
+                    genre=genre,
+                    database_="memgraph"
+                )
             records, summary, keys = client.execute_query(
                 """
                 MATCH (u:User {userId: $userId}), (m:Movie {movieId: $movieId})
                 MERGE (u)-[r:RATED {rating: ToFloat($rating), timestamp: $timestamp}]->(m)
+                WITH m
+                UNWIND $genres AS genre
+                MERGE (m)-[r:OF_GENRE {name: genre}]->(g:Genre {genre: genre})
                 """,
                 userId=user['userId'],
                 rating=user['rating'],
                 movieId=movie['movieId'],
+                genres= movie["genres"],
                 timestamp=user['timestamp'],
                 database_="memgraph"
             )
